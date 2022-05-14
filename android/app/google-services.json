@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "303906231846",
+    "project_id": "projectannachhatra",
+    "storage_bucket": "projectannachhatra.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303906231846:android:abadd199a181003ac378e7",
+        "android_client_info": {
+          "package_name": "com.example.annachhatra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "303906231846-2ugd5flo2k7999raf91bjlt87rfehqbh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxD4LRmWNGFWe36Ij7-TI3WnieFUqInbw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "303906231846-2ugd5flo2k7999raf91bjlt87rfehqbh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
