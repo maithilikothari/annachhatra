@@ -36,6 +36,10 @@ class HotelTab extends StatelessWidget {
                   flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(imageUrl),
+                          fit: BoxFit.cover,
+                        ),
                         color: ColorPallet().accentColor.withOpacity(0.5),
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(10),
@@ -67,16 +71,16 @@ class HotelTab extends StatelessWidget {
                                   'Quantity',
                                   style: TextStyle(
                                       color: isNonVeg
-                                          ? ColorPallet().textColor
-                                          : Colors.white,
+                                          ? Colors.white
+                                          : ColorPallet().textColor,
                                       fontSize: 15),
                                 ),
                                 Text(
                                   quantity,
                                   style: TextStyle(
                                       color: isNonVeg
-                                          ? ColorPallet().textColor
-                                          : Colors.white,
+                                          ? Colors.white
+                                          : ColorPallet().textColor,
                                       fontSize: 30,
                                       fontWeight: FontWeight.w800),
                                 ),
