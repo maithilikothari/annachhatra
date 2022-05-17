@@ -1,4 +1,5 @@
 import 'package:annachhatra/HomeScreen/Widgets/GeneratePickUpOrderDialogue.dart';
+import 'package:annachhatra/HomeScreen/Widgets/HotelTab.dart';
 import 'package:annachhatra/LoginScreen/LoginScreen.dart';
 import 'package:annachhatra/utils/ColorPallet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -183,7 +184,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (snapshot.data.docs.isNotEmpty) {
                             DocumentSnapshot userData =
                                 snapshot.data.docs[index];
-                            return Text('');
+                            return HotelTab(
+                              hotelName: userData.get('hotelName'),
+                              imageUrl: userData.get('profile'),
+                              isNonVeg: userData.get('isNonVeg'),
+                              quantity:
+                                  userData.get('totalQuantity').toString(),
+                              location: userData.get('location'),
+                              orderId: userData.id,
+                            );
                           } else {
                             return const Center(
                                 child: Text(

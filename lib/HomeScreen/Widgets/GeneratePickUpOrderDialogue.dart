@@ -2,6 +2,7 @@ import 'package:annachhatra/HomeScreen/Widgets/AddDishListTab.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../utils/ColorPallet.dart';
@@ -16,12 +17,13 @@ class GeneratePickUpOrderDialogue extends StatefulWidget {
 class _GeneratePickUpOrderDialogueState
     extends State<GeneratePickUpOrderDialogue> {
   String url;
-  bool isNonVeg;
+  bool isNonVeg, loading;
   TextEditingController nameController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   @override
   void initState() {
     isNonVeg = false;
+    loading = false;
     super.initState();
   }
 
@@ -74,6 +76,7 @@ class _GeneratePickUpOrderDialogueState
   String dishName = '';
   String quantity = '';
   List<Map> dishes = [];
+  int i = 0;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
@@ -146,6 +149,11 @@ class _GeneratePickUpOrderDialogueState
                                       ),
                                       onChanged: (value) {
                                         quantity = value;
+                                        try {
+                                          i = i + int.parse(quantity);
+                                        } catch (e) {
+                                          print(e);
+                                        }
                                       },
                                       controller: quantityController,
                                       keyboardType: TextInputType.number,
@@ -225,38 +233,78 @@ class _GeneratePickUpOrderDialogueState
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    MaterialButton(
-                                      elevation: 4,
-                                      color: ColorPallet().accentColor,
-                                      shape: const StadiumBorder(),
-                                      child: const Text('Generate'),
-                                      onPressed: () async {
-                                        if (dishes.isNotEmpty) {
-                                          Position position =
-                                              await _determinePosition();
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                                  content: Text(
-                                                      position.toString())));
-                                          // _fireStoreOrdersCollection.add({
-                                          //   'id': DateTime.now()
-                                          //       .millisecondsSinceEpoch
-                                          //       .toString(),
-                                          //   'location': position,
-                                          //   'available': true,
-                                          //   'ownerId': FirebaseAuth
-                                          //       .instance.currentUser.email
-                                          //       .toString()
-                                          // });
-                                        } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(const SnackBar(
-                                                  content:
-                                                      Text('Add the Dishes')));
-                                        }
-                                      },
-                                      textColor: ColorPallet().textColor,
-                                    )
+                                    loading
+                                        ? SpinKitCircle(
+                                            color: ColorPallet().accentColor,
+                                          )
+                                        : MaterialButton(
+                                            elevation: 4,
+                                            color: ColorPallet().accentColor,
+                                            shape: const StadiumBorder(),
+                                            child: const Text('Generate'),
+                                            onPressed: () async {
+                                              if (dishes.isNotEmpty) {
+                                                String id = FirebaseAuth
+                                                        .instance
+                                                        .currentUser
+                                                        .email
+                                                        .toString() +
+                                                    DateTime.now()
+                                                        .millisecondsSinceEpoch
+                                                        .toString();
+                                                Position position =
+                                                    await _determinePosition();
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                        content: Text(position
+                                                            .toString())));
+                                                setState(() {
+                                                  loading = true;
+                                                });
+                                                _fireStoreOrdersCollection.add({
+                                                  'id': id,
+                                                  'location': GeoPoint(
+                                                      position.latitude,
+                                                      position.longitude),
+                                                  'available': true,
+                                                  'ownerId': FirebaseAuth
+                                                      .instance
+                                                      .currentUser
+                                                      .email
+                                                      .toString(),
+                                                  'allotedId': '',
+                                                  'isNonVeg': isNonVeg,
+                                                  'totalQuantity': i,
+                                                  'hotelName':
+                                                      snapshot.data.get('name'),
+                                                  'profile': snapshot.data
+                                                      .get('profile'),
+                                                }).then((value) async {
+                                                  for (Map a in dishes) {
+                                                    await value
+                                                        .collection('items')
+                                                        .doc(DateTime.now()
+                                                            .millisecondsSinceEpoch
+                                                            .toString())
+                                                        .set({
+                                                      'name': a['name'],
+                                                      'quantity': a['quantity']
+                                                    });
+                                                  }
+                                                  setState(() {
+                                                    loading = false;
+                                                  });
+                                                  Navigator.pop(context);
+                                                });
+                                              } else {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(const SnackBar(
+                                                        content: Text(
+                                                            'Add the Dishes')));
+                                              }
+                                            },
+                                            textColor: ColorPallet().textColor,
+                                          )
                                   ],
                                 ),
                               ),

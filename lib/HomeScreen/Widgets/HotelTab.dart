@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/ColorPallet.dart';
@@ -9,12 +10,16 @@ class HotelTab extends StatelessWidget {
     this.hotelName,
     this.quantity,
     this.orderId,
-    this.isVeg,
+    this.isNonVeg,
+    this.imageUrl,
+    this.location,
   }) : super(key: key);
   final String hotelName;
-  final bool isVeg;
+  final bool isNonVeg;
   final String quantity;
   final String orderId;
+  final String imageUrl;
+  final GeoPoint location;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -51,9 +56,9 @@ class HotelTab extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: const BorderRadius.only(
                                   bottomLeft: Radius.circular(20)),
-                              color: isVeg
-                                  ? ColorPallet().vegColor.withOpacity(0.5)
-                                  : ColorPallet().nonVegColor.withOpacity(0.5),
+                              color: isNonVeg
+                                  ? ColorPallet().nonVegColor.withOpacity(0.5)
+                                  : ColorPallet().vegColor.withOpacity(0.5),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -61,7 +66,7 @@ class HotelTab extends StatelessWidget {
                                 Text(
                                   'Quantity',
                                   style: TextStyle(
-                                      color: isVeg
+                                      color: isNonVeg
                                           ? ColorPallet().textColor
                                           : Colors.white,
                                       fontSize: 15),
@@ -69,7 +74,7 @@ class HotelTab extends StatelessWidget {
                                 Text(
                                   quantity,
                                   style: TextStyle(
-                                      color: isVeg
+                                      color: isNonVeg
                                           ? ColorPallet().textColor
                                           : Colors.white,
                                       fontSize: 30,
