@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:annachhatra/HomeScreen/HomeScreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../utils/ColorPallet.dart';
@@ -23,6 +25,53 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   String email = '', password = '', name = '', verpass = '';
   File imageFile;
+  bool loading;
+
+  @override
+  void initState() {
+    loading = false;
+  }
+
+  Reference storageReference = FirebaseStorage.instance.ref();
+
+  Future<bool> createUser(String url) async {
+    final firestore = FirebaseFirestore.instance;
+    try {
+      await firestore
+          .collection('users')
+          .doc(email)
+          .set({'name': name, 'email': email, 'id': email, 'profile': url});
+      return true;
+    } catch (exception) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(exception.toString())));
+      return false;
+    }
+  }
+
+  Future<String> uploadPic(File file, String id) async {
+    final storageRef = FirebaseStorage.instance.ref();
+
+// Create a reference to "mountains.jpg"
+    final dpRef = storageRef.child("$id.jpg");
+
+// Create a reference to 'images/mountains.jpg'
+    final dpImagesRef = storageRef.child("images/$id.jpg");
+
+// While the file names are the same, the references point to different files
+    assert(dpRef.name == dpImagesRef.name);
+    assert(dpRef.fullPath != dpImagesRef.fullPath);
+    try {
+      await dpRef.putFile(file);
+      String url = await dpRef.getDownloadURL();
+      return url;
+    } catch (e) {
+      print(e.toString());
+      return null;
+      // ...
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,25 +102,48 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         height: 20,
                       ),
                       Center(
-                        child: GestureDetector(
-                          onTap: () async {
-                            PickedFile pickedFile = await ImagePicker()
-                                .getImage(
-                                    source: ImageSource.gallery,
-                                    imageQuality: 30);
-                            if (pickedFile != null) {
-                              setState(() {
-                                imageFile = File(pickedFile.path);
-                              });
-                            }
-                          },
-                          child: Container(
-                            color: Colors.black12.withOpacity(0.5),
-                            height: 200,
-                            width: 200,
-                            child: imageFile == null
-                                ? Icon(Icons.image)
-                                : Image.file(imageFile),
+                        child: SizedBox(
+                          height: 200,
+                          width: 200,
+                          child: AspectRatio(
+                            aspectRatio: 80 / 80,
+                            child: GestureDetector(
+                              onTap: () async {
+                                PickedFile pickedFile = await ImagePicker()
+                                    .getImage(
+                                        source: ImageSource.gallery,
+                                        imageQuality: 30);
+                                if (pickedFile != null) {
+                                  setState(() {
+                                    imageFile = File(pickedFile.path);
+                                  });
+                                }
+                              },
+                              child: Material(
+                                elevation: 4,
+                                borderRadius: BorderRadius.circular(15),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: imageFile == null
+                                      ? Icon(
+                                          Icons.image,
+                                          color: ColorPallet().primaryColor,
+                                          size: 60,
+                                        )
+                                      : Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            image: DecorationImage(
+                                                fit: BoxFit.fill,
+                                                image: FileImage(imageFile)),
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -124,103 +196,163 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         height: 20,
                       ),
                       Center(
-                        child: MaterialButton(
-                          onPressed: () async {
-                            if (name != '') {
-                              if (email != '') {
-                                if (password != '') {
-                                  if (verpass != '') {
-                                    if (password == verpass) {
-                                      try {
-                                        await FirebaseAuth.instance
-                                            .createUserWithEmailAndPassword(
-                                          email: email,
-                                          password: password,
-                                        )
-                                            .then((result) async {
-                                          await result.user
-                                              ?.updateDisplayName(name);
-                                          if (imageFile != null) {
-                                            FirebaseStorage.instance
-                                                .ref('user')
-                                                .child(email)
-                                                .putFile(imageFile)
-                                                .then((p0) => Navigator
-                                                    .pushAndRemoveUntil(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder:
-                                                                (context) =>
-                                                                    HomeScreen(
-                                                                      name: result
-                                                                          .user
-                                                                          ?.displayName,
-                                                                    )),
-                                                        (route) => false));
+                        child: loading
+                            ? SpinKitCircle(
+                                color: ColorPallet().accentColor,
+                              )
+                            : SizedBox(
+                                width: 200,
+                                child: MaterialButton(
+                                  onPressed: () async {
+                                    if (name != '') {
+                                      if (email != '') {
+                                        if (password != '') {
+                                          if (verpass != '') {
+                                            if (password == verpass) {
+                                              try {
+                                                setState(() {
+                                                  loading = true;
+                                                });
+                                                await FirebaseAuth.instance
+                                                    .createUserWithEmailAndPassword(
+                                                  email: email,
+                                                  password: password,
+                                                )
+                                                    .then((result) async {
+                                                  await result.user
+                                                      ?.updateDisplayName(name);
+                                                  if (imageFile != null) {
+                                                    String imageUrl;
+                                                    try {
+                                                      imageUrl =
+                                                          await uploadPic(
+                                                              imageFile, email);
+                                                      if (imageUrl != null) {
+                                                        bool success =
+                                                            await createUser(
+                                                                imageUrl);
+                                                        if (success) {
+                                                          Navigator
+                                                              .pushAndRemoveUntil(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              HomeScreen(
+                                                                                name: result.user?.displayName,
+                                                                              )),
+                                                                  (route) =>
+                                                                      false);
+                                                        } else {
+                                                          setState(() {
+                                                            loading = false;
+                                                          });
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                                  const SnackBar(
+                                                                      content: Text(
+                                                                          'Something Went Wrong while Creating a User')));
+                                                        }
+                                                      } else {
+                                                        setState(() {
+                                                          loading = false;
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                                  const SnackBar(
+                                                                      content: Text(
+                                                                          'Something Went Wrong while Uploading Image')));
+                                                        });
+                                                      }
+                                                    } catch (exception) {
+                                                      setState(() {
+                                                        loading = false;
+                                                      });
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(SnackBar(
+                                                              content: Text(
+                                                                  exception
+                                                                      .toString())));
+                                                      if (imageUrl != null) {
+                                                        print(imageUrl);
+                                                      } else {
+                                                        print(
+                                                            'imageUrl is not get');
+                                                      }
+                                                    }
+                                                  } else {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                            const SnackBar(
+                                                                content: Text(
+                                                                    'Provide Image')));
+                                                  }
+                                                });
+                                              } on FirebaseAuthException catch (e) {
+                                                setState(() {
+                                                  loading = false;
+                                                });
+                                                if (e.code == 'weak-password') {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(const SnackBar(
+                                                          content: Text(
+                                                              'The password provided is too weak.')));
+                                                } else if (e.code ==
+                                                    'email-already-in-use') {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(const SnackBar(
+                                                          content: Text(
+                                                              'The account already exists for that email.')));
+                                                }
+                                              } catch (e) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(const SnackBar(
+                                                        content: Text(
+                                                            'Something went wrong')));
+                                              }
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                      content: Text(
+                                                          "Oops Password Don't Match !")));
+                                            }
                                           } else {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(const SnackBar(
-                                                    content:
-                                                        Text('Provide Image')));
+                                                    content: Text(
+                                                        "Provide Verification Password")));
                                           }
-                                        });
-                                      } on FirebaseAuthException catch (e) {
-                                        if (e.code == 'weak-password') {
+                                        } else {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(const SnackBar(
                                                   content: Text(
-                                                      'The password provided is too weak.')));
-                                        } else if (e.code ==
-                                            'email-already-in-use') {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(const SnackBar(
-                                                  content: Text(
-                                                      'The account already exists for that email.')));
+                                                      "Provide Password")));
                                         }
-                                      } catch (e) {
+                                      } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(const SnackBar(
-                                                content: Text(
-                                                    'Something went wrong')));
-                                        print(e);
+                                                content:
+                                                    Text("Provide email")));
                                       }
                                     } else {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(const SnackBar(
-                                              content: Text(
-                                                  "Oops Password Don't Match !")));
+                                              content: Text("Provide name")));
                                     }
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                "Provide Verification Password")));
-                                  }
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text("Provide Password")));
-                                }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text("Provide email")));
-                              }
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text("Provide name")));
-                            }
-                          },
-                          shape: const StadiumBorder(),
-                          color: ColorPallet().accentColor,
-                          child: Text(
-                            "Register",
-                            style: TextStyle(
-                                color: ColorPallet().textColor,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                                  },
+                                  shape: const StadiumBorder(),
+                                  color: ColorPallet().accentColor,
+                                  child: Text(
+                                    "Register",
+                                    style: TextStyle(
+                                        color: ColorPallet().textColor,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
                       ),
                     ],
                   ),

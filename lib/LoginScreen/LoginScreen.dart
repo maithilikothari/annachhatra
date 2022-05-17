@@ -2,13 +2,29 @@ import 'package:annachhatra/RegistrationScreen/RegistrationScreen.dart';
 import 'package:annachhatra/utils/ColorPallet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../HomeScreen/HomeScreen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   LoginScreen({Key key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   String email = '';
+
   String password = '';
+
+  bool loading;
+
+  @override
+  void initState() {
+    loading = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +46,7 @@ class LoginScreen extends StatelessWidget {
                 'Annachhatra',
                 style: TextStyle(
                     color: Colors.white,
-                    fontSize: 35,
+                    fontSize: 38,
                     fontWeight: FontWeight.bold),
               ),
             ),
@@ -45,8 +61,11 @@ class LoginScreen extends StatelessWidget {
                 'Log In',
                 style: TextStyle(
                     color: ColorPallet().primaryColor,
-                    fontSize: 35,
+                    fontSize: 38,
                     fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                height: 50,
               ),
               TextField(
                 keyboardType: TextInputType.emailAddress,
@@ -62,6 +81,9 @@ class LoginScreen extends StatelessWidget {
                 onChanged: (value) {
                   password = value;
                 },
+              ),
+              const SizedBox(
+                height: 30,
               ),
               Container(
                 padding: EdgeInsets.symmetric(vertical: 30),
@@ -80,17 +102,27 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               Center(
-                child: RawMaterialButton(
-                    shape: const StadiumBorder(),
-                    fillColor: ColorPallet().accentColor,
-                    onPressed: () async {
-                      if (email != '') {
-                        if (password != '') {
-                          try {
-                            await FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                                    email: email, password: password)
-                                .then((value) => {
+                child: loading
+                    ? SpinKitCircle(
+                        color: ColorPallet().accentColor,
+                      )
+                    : SizedBox(
+                        width: 200,
+                        child: RawMaterialButton(
+                            shape: const StadiumBorder(),
+                            fillColor: ColorPallet().accentColor,
+                            onPressed: () async {
+                              if (email != '') {
+                                if (password != '') {
+                                  try {
+                                    await FirebaseAuth.instance
+                                        .signInWithEmailAndPassword(
+                                            email: email, password: password)
+                                        .then((value) {
+                                      setState(() {
+                                        loading = true;
+                                      });
+
                                       Navigator.pushAndRemoveUntil(
                                           context,
                                           MaterialPageRoute(
@@ -98,40 +130,44 @@ class LoginScreen extends StatelessWidget {
                                                     name:
                                                         value.user?.displayName,
                                                   )),
-                                          (route) => false)
+                                          (route) => false);
                                     });
-                          } on FirebaseAuthException catch (e) {
-                            if (e.code == 'user-not-found') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'No user found for that email.')));
-                            } else if (e.code == 'wrong-password') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Wrong password provided for that user.')));
-                            }
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            content: Text('Enter Password please'),
-                          ));
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Enter email please'),
-                        ));
-                      }
-                    },
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                          color: ColorPallet().textColor,
-                          fontWeight: FontWeight.bold),
-                    )),
+                                  } on FirebaseAuthException catch (e) {
+                                    setState(() {
+                                      loading = false;
+                                    });
+                                    if (e.code == 'user-not-found') {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'No user found for that email.')));
+                                    } else if (e.code == 'wrong-password') {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'Wrong password provided for that user.')));
+                                    }
+                                  }
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text('Enter Password please'),
+                                  ));
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text('Enter email please'),
+                                ));
+                              }
+                            },
+                            child: Text(
+                              'Login',
+                              style: TextStyle(
+                                  color: ColorPallet().textColor,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ),
               )
             ],
           ),
