@@ -19,10 +19,12 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = '';
 
   bool loading;
+  bool invisible;
 
   @override
   void initState() {
     loading = false;
+    invisible=true;
   }
 
   @override
@@ -76,8 +78,20 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextField(
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(hintText: 'password'),
-                obscureText: true,
+                decoration:  InputDecoration(hintText: 'password',
+
+                    suffix: IconButton(
+                      icon: Icon(
+                        invisible ? Icons.remove_red_eye_rounded : Icons.remove_red_eye_outlined,
+                      ),
+                      onPressed:() {
+                    setState(() {
+                     invisible ? invisible=false : invisible=true;
+                     });
+  }
+                    ),
+                ),
+                obscureText: invisible,
                 onChanged: (value) {
                   password = value;
                 },
