@@ -11,9 +11,12 @@ class _PickUPOrderState extends State<PickUPOrder> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('View Donation'),
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 30),
+        backgroundColor: Colors.green,
+        title: Text('Pick Up Order'),
+      ),
+      body: Container(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Material(
             borderRadius: BorderRadius.all(
               Radius.circular(20),
@@ -22,7 +25,7 @@ class _PickUPOrderState extends State<PickUPOrder> {
             child: Container(
               height: MediaQuery.of(context).size.height -
                   MediaQuery.of(context).padding.top -
-                  AppBar().preferredSize.height * 12,
+                  AppBar().preferredSize.height * 10,
               width: double.maxFinite,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(
@@ -39,7 +42,7 @@ class _PickUPOrderState extends State<PickUPOrder> {
                       padding: EdgeInsets.only(top: 40, left: 10, right: 20),
                       height: 200,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(20),
                               bottomLeft: Radius.circular(20)),
                           color: Colors.lightGreen.shade200),
@@ -70,81 +73,100 @@ class _PickUPOrderState extends State<PickUPOrder> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Paneer Masala',
-                                style: TextStyle(color: Colors.green),
-                              ),
-                              SizedBox(
-                                width: 40,
-                              ),
-                              Text(
-                                '2',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                          Expanded(
+                            child: Container(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 5, vertical: 20),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Paneer Masala',
+                                            style:
+                                                TextStyle(color: Colors.green),
+                                          ),
+                                          Text(
+                                            '2',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Chicken Kebab',
+                                          style: TextStyle(
+                                              color: Colors.deepOrange),
+                                        ),
+                                        Text(
+                                          '10',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 17,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Chicken Kebab',
-                                style: TextStyle(color: Colors.deepOrange),
                               ),
-                              SizedBox(
-                                width: 40,
-                              ),
-                              Text(
-                                '10',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              SizedBox(height: 70),
-                            ],
+                            ),
                           ),
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text(
-                                  '9.30pm,Today',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontStyle: FontStyle.italic),
-                                ),
-                                Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Container(
-                                    decoration: BoxDecoration(),
-                                    height: 25,
-                                    child: RawMaterialButton(
-                                      shape: StadiumBorder(),
-                                      fillColor: Colors.red,
-                                      onPressed: () {},
-                                      child: Text(
-                                        'Delete',
-                                        style: TextStyle(
-                                          color: Colors.white,
+                          Padding(
+                            padding:
+                                EdgeInsets.only(left: 10, right: 3, bottom: 5),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '9.30pm,Today',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      decoration: BoxDecoration(),
+                                      height: 25,
+                                      child: RawMaterialButton(
+                                        shape: StadiumBorder(),
+                                        fillColor: Colors.red,
+                                        onPressed: () {},
+                                        child: Text(
+                                          'Delete',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ]),
+                                ]),
+                          ),
                         ],
                       ),
                     ),
