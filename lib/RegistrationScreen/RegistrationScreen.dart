@@ -27,6 +27,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   File imageFile;
   bool loading;
 
+  final _formKey=GlobalKey<FormState>();
+
+  RegExp pass_valid=RegExp(r"(?=.\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\w)");
+
+  bool validatePassword(String pass){
+    String _password = pass.trim();
+
+    if(pass_valid.hasMatch(_password)){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
   @override
   void initState() {
     loading = false;
@@ -209,121 +223,129 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                         if (password != '') {
                                           if (verpass != '') {
                                             if (password == verpass) {
-                                              try {
-                                                setState(() {
-                                                  loading = true;
-                                                });
-                                                await FirebaseAuth.instance
-                                                    .createUserWithEmailAndPassword(
-                                                  email: email,
-                                                  password: password,
-                                                )
-                                                    .then((result) async {
-                                                  await result.user
-                                                      ?.updateDisplayName(name);
-                                                  if (imageFile != null) {
-                                                    String imageUrl;
-                                                    try {
-                                                      imageUrl =
-                                                          await uploadPic(
-                                                              imageFile, email);
-                                                      if (imageUrl != null) {
-                                                        bool success =
-                                                            await createUser(
-                                                                imageUrl);
-                                                        if (success) {
-                                                          Navigator
-                                                              .pushAndRemoveUntil(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              HomeScreen(
-                                                                                name: result.user?.displayName,
-                                                                              )),
-                                                                  (route) =>
-                                                                      false);
+                                              if(validatePassword(password)){
+                                                try {
+                                                  setState(() {
+                                                    loading = true;
+                                                  });
+                                                  await FirebaseAuth.instance
+                                                      .createUserWithEmailAndPassword(
+                                                    email: email,
+                                                    password: password,
+                                                  )
+                                                      .then((result) async {
+                                                    await result.user
+                                                        ?.updateDisplayName(name);
+                                                    if (imageFile != null) {
+                                                      String imageUrl;
+                                                      try {
+                                                        imageUrl =
+                                                        await uploadPic(
+                                                            imageFile, email);
+                                                        if (imageUrl != null) {
+                                                          bool success =
+                                                          await createUser(
+                                                              imageUrl);
+                                                          if (success) {
+                                                            Navigator
+                                                                .pushAndRemoveUntil(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder:
+                                                                        (context) =>
+                                                                        HomeScreen(
+                                                                          name: result.user?.displayName,
+                                                                        )),
+                                                                    (route) =>
+                                                                false);
+                                                          } else {
+                                                            setState(() {
+                                                              loading = false;
+                                                            });
+                                                            ScaffoldMessenger.of(
+                                                                context)
+                                                                .showSnackBar(
+                                                                const SnackBar(
+                                                                    content: Text(
+                                                                        'Something Went Wrong while Creating a User')));
+                                                          }
                                                         } else {
                                                           setState(() {
                                                             loading = false;
+                                                            ScaffoldMessenger.of(
+                                                                context)
+                                                                .showSnackBar(
+                                                                const SnackBar(
+                                                                    content: Text(
+                                                                        'Something Went Wrong while Uploading Image')));
                                                           });
-                                                          ScaffoldMessenger.of(
-                                                                  context)
-                                                              .showSnackBar(
-                                                                  const SnackBar(
-                                                                      content: Text(
-                                                                          'Something Went Wrong while Creating a User')));
                                                         }
-                                                      } else {
+                                                      } catch (exception) {
                                                         setState(() {
                                                           loading = false;
-                                                          ScaffoldMessenger.of(
-                                                                  context)
-                                                              .showSnackBar(
-                                                                  const SnackBar(
-                                                                      content: Text(
-                                                                          'Something Went Wrong while Uploading Image')));
                                                         });
-                                                      }
-                                                    } catch (exception) {
-                                                      setState(() {
-                                                        loading = false;
-                                                      });
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(SnackBar(
-                                                              content: Text(
-                                                                  exception
-                                                                      .toString())));
-                                                      if (imageUrl != null) {
-                                                        print(imageUrl);
-                                                      } else {
-                                                        print(
-                                                            'imageUrl is not get');
-                                                      }
-                                                    }
-                                                  } else {
-                                                    ScaffoldMessenger.of(
+                                                        ScaffoldMessenger.of(
                                                             context)
-                                                        .showSnackBar(
-                                                            const SnackBar(
-                                                                content: Text(
-                                                                    'Provide Image')));
+                                                            .showSnackBar(SnackBar(
+                                                            content: Text(
+                                                                exception
+                                                                    .toString())));
+                                                        if (imageUrl != null) {
+                                                          print(imageUrl);
+                                                        } else {
+                                                          print(
+                                                              'imageUrl is not get');
+                                                        }
+                                                      }
+                                                    } else {
+                                                      ScaffoldMessenger.of(
+                                                          context)
+                                                          .showSnackBar(
+                                                          const SnackBar(
+                                                              content: Text(
+                                                                  'Provide Image')));
+                                                    }
+                                                  });
+                                                } on FirebaseAuthException catch (e) {
+                                                  setState(() {
+                                                    loading = false;
+                                                  });
+                                                  if (e.code == 'weak-password') {
+                                                    ScaffoldMessenger.of(context)
+                                                        .showSnackBar(const SnackBar(
+                                                        content: Text(
+                                                            'The password provided is too weak.')));
+                                                  } else if (e.code ==
+                                                      'email-already-in-use') {
+                                                    ScaffoldMessenger.of(context)
+                                                        .showSnackBar(const SnackBar(
+                                                        content: Text(
+                                                            'The account already exists for that email.')));
                                                   }
-                                                });
-                                              } on FirebaseAuthException catch (e) {
-                                                setState(() {
-                                                  loading = false;
-                                                });
-                                                if (e.code == 'weak-password') {
+                                                } catch (e) {
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(const SnackBar(
-                                                          content: Text(
-                                                              'The password provided is too weak.')));
-                                                } else if (e.code ==
-                                                    'email-already-in-use') {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(const SnackBar(
-                                                          content: Text(
-                                                              'The account already exists for that email.')));
+                                                      content: Text(
+                                                          'Something went wrong')));
                                                 }
-                                              } catch (e) {
+                                              } else {
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(const SnackBar(
-                                                        content: Text(
-                                                            'Something went wrong')));
+                                                    content: Text(
+                                                        "Oops Password Don't Match !")));
                                               }
-                                            } else {
+                                              }
+                                            else{
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(const SnackBar(
-                                                      content: Text(
-                                                          "Oops Password Don't Match !")));
+                                                  content: Text(
+                                                      "Password must contain Capital Letter alphanumeric character and number")));
                                             }
                                           } else {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(const SnackBar(
-                                                    content: Text(
-                                                        "Provide Verification Password")));
+                                                content: Text(
+                                                    "Provide Verification Password")));
                                           }
                                         } else {
                                           ScaffoldMessenger.of(context)

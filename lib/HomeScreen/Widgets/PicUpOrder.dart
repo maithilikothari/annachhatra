@@ -22,9 +22,7 @@ class _PickUPOrderState extends State<PickUPOrder> {
 }
 
 class ListViewBuilder extends StatelessWidget {
-  const ListViewBuilder({
-    Key key,
-  }) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +73,7 @@ class ListViewBuilder extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 22,
                           color: Colors.black,
-                          fontWeight: FontWeight.bold),
+                          fontWeight: FontWeight.bold)
                     ),
                   ]),
                 ),
@@ -128,7 +126,7 @@ class ListViewBuilder extends StatelessWidget {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Chicken Kebab',
+                                        'Chiken Kebab',
                                         style:
                                             TextStyle(color: Colors.deepOrange),
                                       ),

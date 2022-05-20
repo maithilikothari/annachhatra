@@ -27,6 +27,20 @@ class _LoginScreenState extends State<LoginScreen> {
     invisible=true;
   }
 
+  final _formKey=GlobalKey<FormState>();
+
+  RegExp pass_valid=RegExp(r"(?=.\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\w)");
+
+  bool validatePassword(String pass){
+    String _password = pass.trim();
+
+    if(pass_valid.hasMatch(_password)){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,8 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 keyboardType: TextInputType.emailAddress,
                 decoration:  InputDecoration(hintText: 'password',
-
-                    suffix: IconButton(
+                  suffix: IconButton(
                       icon: Icon(
                         invisible ? Icons.remove_red_eye_rounded : Icons.remove_red_eye_outlined,
                       ),
@@ -88,8 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     setState(() {
                      invisible ? invisible=false : invisible=true;
                      });
-  }
-                    ),
+               }),
                 ),
                 obscureText: invisible,
                 onChanged: (value) {
