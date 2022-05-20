@@ -15,14 +15,14 @@ class _PickUPOrderState extends State<PickUPOrder> {
         title: Text('Pick Up Order'),
       ),
       body: Container(
-        child: NewWidget1(),
+        child: ListViewBuilder(),
       ),
     );
   }
 }
 
-class NewWidget1 extends StatelessWidget {
-  const NewWidget1({
+class ListViewBuilder extends StatelessWidget {
+  const ListViewBuilder({
     Key key,
   }) : super(key: key);
 
