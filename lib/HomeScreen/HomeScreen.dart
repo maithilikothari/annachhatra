@@ -1,11 +1,14 @@
 import 'package:annachhatra/HomeScreen/Widgets/GeneratePickUpOrderDialogue.dart';
 import 'package:annachhatra/HomeScreen/Widgets/HotelTab.dart';
+import 'package:annachhatra/HomeScreen/Widgets/PicUpOrder.dart';
 import 'package:annachhatra/LoginScreen/LoginScreen.dart';
 import 'package:annachhatra/utils/ColorPallet.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'Widgets/ViewDonation.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key key, this.name}) : super(key: key);
@@ -88,8 +91,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       onTap: () {
-                        // Update the state of the app.
-                        // ...
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ViewDonation()),
+                        );
                       },
                     ),
                     ListTile(
@@ -109,8 +115,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       onTap: () {
-                        // Update the state of the app.
-                        // ...
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PickUPOrder()),
+                        );
                       },
                     ),
                     ListTile(

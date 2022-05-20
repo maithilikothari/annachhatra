@@ -319,6 +319,5 @@ class _GeneratePickUpOrderDialogueState
             return const Dialog();
           }
         });
-    ;
   }
 }
